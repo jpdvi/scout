@@ -1,14 +1,15 @@
 mod parser;
 mod token;
-use parser::Reader;
+use parser::Template;
+use parser::Lexer;
+use std::collections::HashMap;
 
 fn main() {
-    let st: &str = "my new template, james {bond}";
-    let mut reader = parser::Template {
-        text: st,
-        read_position: 0,
-        position: 0,
-    };
+    let st: &str = "my new template {butt}";
+    let data : HashMap<&str, &str> = [
+        ("butt", "ass"),
+    ].iter().cloned().collect();
 
-    reader.read();
+    let mut temp = Template::new(st, data);
+    temp.read();
 }

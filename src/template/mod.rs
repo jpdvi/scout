@@ -1,6 +1,5 @@
 use super::token;
 use super::data::Data;
-use std::collections::HashMap;
 
 pub struct Pattern<'a> {
     pub left: &'a str,
@@ -17,8 +16,6 @@ impl<'a> Pattern<'a> {
 }
 
 pub struct Mark {
-    pub left_token : Option<token::Token>,
-    pub right_token: Option<token::Token>,
     pub left_index : Option<usize>,
     pub right_index: Option<usize>,
 }
@@ -27,8 +24,6 @@ pub struct Mark {
 impl Mark {
     fn new() -> Self {
         Self {
-            left_token: None,
-            right_token: None,
             left_index : None,
             right_index : None,
         }
@@ -40,11 +35,6 @@ pub trait Lexer {
     fn read_char(&mut self);
     fn next_token(&mut self) -> token::Token;
     fn peek_char(&mut self)-> Option<char>;
-}
-
-pub trait Parser {
-    fn parse(&mut self) -> Result<&str, &str>;
-    fn mark(&mut self); 
 }
 
 pub struct Template<'a> {
@@ -85,7 +75,7 @@ impl<'a> Template<'a> {
         return content
     }
 
-    pub fn compile(&mut self) -> String {
+    pub fn compile(&mut self) -> Result<String, &str> {
         self.read();
         let mut mark = Mark::new();
         for (i, item) in self.tokens.iter().enumerate() {
@@ -114,6 +104,8 @@ impl<'a> Template<'a> {
             // Check if data_key exists in our self.data (Data) map
             if self.data.data.contains_key(&data_key.to_string()) {
                 content.push_str(&self.data.data[&data_key.to_string()]);
+            } else {
+                return Err("Unknown data key")
             }
             // Keep track of removed item count in this iteration
             let mut temp : usize = 0;
@@ -147,7 +139,7 @@ impl<'a> Template<'a> {
                 formatted_content.push_str(&String::from(&item.literal));
             }
         }
-        return formatted_content;
+        return Ok(formatted_content);
     }
 }
 
@@ -240,10 +232,9 @@ mod tests {
         let mut d = Data::new();
         d.add_many(vec![("one","two"), ("two", "three")]);
         let mut t = Template::new(st, d,  Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
-        let result : String = t.compile();
-
+        let result = t.compile();
         //assert_eq!(t.read_position, st.len() as u32);
-        assert_eq!(result, test_string);
+        assert_eq!(result.unwrap(), test_string);
         assert_eq!(t.input, st);
         assert_eq!(t.data.data.len() as u32, 2); 
     }

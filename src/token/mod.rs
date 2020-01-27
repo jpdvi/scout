@@ -1,11 +1,13 @@
 pub type TokenType<'a> = &'a str;
 
 pub static LEFTBRACKET: &str = "{";
+pub static DOUBLELEFTBRACKET: &str ="{{";
 pub static RIGHTBRACKET: &str = "}";
+pub static DOUBLERIGHTBRACKET: &str = "}}";
 pub static EOF: &str = "EOF";
 pub static ILLEGAL: &str = "ILLEGAL";
 pub static TEXT: &str = "TEXT";
-wq2340p['
+pub static SPACE: &str = "SPACE";
 
 pub struct Token {
     pub literal: String,
@@ -23,4 +25,13 @@ impl Token {
             _type : String::from(_type),
         }
     }
+}
+
+impl Clone for Token {
+    fn clone(&self) -> Self {
+            Self {
+                _type : String::from(&self._type),
+                literal : String::from(&self.literal)
+            }
+        }
 }

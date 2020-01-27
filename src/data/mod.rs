@@ -1,23 +1,23 @@
 use std::collections::HashMap;
 
-pub struct Data<'a> {
-    pub data : HashMap<&'a str, &'a str>,
+pub struct Data {
+    pub data : HashMap<String, String>,
 }
 
 
-impl<'a> Data<'a> {
-    pub fn new() -> Data<'a> {
+impl Data {
+    pub fn new() -> Data{
         let mut d = Data {
             data : [].iter().cloned().collect()
         };
         return d
     }
 
-    pub fn add(&mut self, key: &'a str, value: &'a str) { //-> Result<Option<(&str, &str)>, &str> {
-        self.data.insert(key, value);        
+    pub fn add(&mut self, key: &str, value: &str) { //-> Result<Option<(&str, &str)>, &str> {
+        self.data.insert(String::from(key), String::from(value));        
     }
 
-    pub fn add_many(&mut self, key_values: Vec<(&'a str, &'a str)>) {
+    pub fn add_many(&mut self, key_values: Vec<(&str, &str)>) {
         for kv in key_values.iter() {
             self.add(kv.0, kv.1);
         }

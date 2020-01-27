@@ -5,26 +5,22 @@ pub static RIGHTBRACKET: &str = "}";
 pub static EOF: &str = "EOF";
 pub static ILLEGAL: &str = "ILLEGAL";
 pub static TEXT: &str = "TEXT";
+wq2340p['
 
-pub struct Token<'a> {
+pub struct Token {
     pub literal: String,
-    pub _type: TokenType<'a>,
+    pub _type: String,
 }
 
-impl<'a> Token<'a> {
-    pub fn new(_type : TokenType, ch : Option<char>) -> Token {
+impl Token {
+    pub fn new(_type : &str, ch : Option<char>) -> Token {
         let mut _literal = match ch {
             None => ' '.to_string(),
             _=> ch.unwrap().to_string()
         };
         Token {
             literal : _literal,
-            _type : _type,
+            _type : String::from(_type),
         }
     }
-}
-
-pub struct Pattern<'a> {
-    pub left: Token<'a>,
-    pub right: Token<'a>,
 }

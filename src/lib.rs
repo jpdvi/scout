@@ -218,7 +218,7 @@ mod tests {
     use super::Lexer;
 
     
-    //#[test]
+    #[test]
     fn test_template_create() {
         let st: &str = "my new template {test}";
         let mut d = Data::new();
@@ -233,13 +233,12 @@ mod tests {
         d.add_many(vec![("one","two"), ("two", "three")]);
         let mut t = Template::new(st, d,  Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
         let result = t.compile();
-        //assert_eq!(t.read_position, st.len() as u32);
         assert_eq!(result.unwrap(), test_string);
         assert_eq!(t.input, st);
         assert_eq!(t.data.data.len() as u32, 2); 
     }
 
-    //#[test]
+    #[test]
     fn test_read() {
         let st: &str = "my {{one}} {new template {{two}}";
         let mut d = Data::new();

@@ -1,13 +1,21 @@
 pub type TokenType<'a> = &'a str;
 
-pub static LEFTBRACKET: &str = "{";
+// Templating
 pub static DOUBLELEFTBRACKET: &str ="{{";
-pub static RIGHTBRACKET: &str = "}";
 pub static DOUBLERIGHTBRACKET: &str = "}}";
+// Generic
 pub static EOF: &str = "EOF";
 pub static ILLEGAL: &str = "ILLEGAL";
 pub static TEXT: &str = "TEXT";
 pub static SPACE: &str = "SPACE";
+// Tokens
+pub static LEFTBRACKET: &str = "{";
+pub static RIGHTBRACKET: &str = "}";
+// Operators
+pub static LT: &str = "<";
+pub static GT: &str = ">";
+// HTML
+pub static ENDHTMLBLOCK: &str = "/>";
 
 pub struct Token {
     pub literal: String,
@@ -36,25 +44,37 @@ impl Clone for Token {
         }
 }
 
+pub enum PatternType {
+    HTML,
+    STRING,
+}
+
 pub struct Pattern {
+    pub _type: PatternType,
     pub left: String,
     pub right: String
 }
 
 impl Pattern {
-    pub fn new(left: TokenType, right: TokenType) -> Self {
+    pub fn new(left: TokenType, right: TokenType, _type: PatternType) -> Self {
         Self {
             left: String::from(left),
-            right: String::from(right)
+            right: String::from(right),
+            _type: _type,
         }
     }
 }
 
 impl Clone for Pattern {
     fn clone(&self) -> Self {
+        let t : PatternType = match &self._type {
+            PatternType::HTML => PatternType::HTML,
+            _=> PatternType::STRING
+        };
         Self {
             left: String::from(&self.left),
-            right: String::from(&self.right)
+            right: String::from(&self.right),
+            _type: t,
         }
     }
 }

@@ -1,6 +1,7 @@
 mod token;
 mod data;
 mod lexer;
+mod parser;
 use lexer::Lexing;
 
 
@@ -29,11 +30,15 @@ pub struct Template<'a> {
 }
 
 impl<'a> Template<'a> {
-    pub fn new(input: &'a str, data: data::Data, pattern: token::Pattern) -> Self {
+    pub fn new(input: &'a str, 
+        data: data::Data, 
+        left_delimiter : token::TokenType, 
+        right_delimiter: token::TokenType) -> Self {
+        let _pattern : token::Pattern = token::Pattern::new(left_delimiter, right_delimiter, token::PatternType::STRING);
         let mut template = Self { 
-            l : lexer::Lexer::new(input, data.clone(), pattern.clone()),
+            l : lexer::Lexer::new(input, &data, &_pattern),
             input: input,
-            pattern: pattern,
+            pattern: _pattern.clone(),
             marks : vec![],
             tokens : vec![],
         };
@@ -137,7 +142,7 @@ mod tests {
     fn test_template_create() {
         let st: &str = "my new template {test}";
         let mut d = Data::new();
-        let mut t = Template::new(st, d, token::Pattern::new(token::LEFTBRACKET, token::RIGHTBRACKET));
+        let mut t = Template::new(st, d, token::LEFTBRACKET, token::RIGHTBRACKET);
     }
 
     #[test]
@@ -146,7 +151,7 @@ mod tests {
         let test_string : &str = "my two new template three";
         let mut d = Data::new();
         d.add_many(vec![("one","two"), ("two", "three")]);
-        let mut t = Template::new(st, d,  token::Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
+        let mut t = Template::new(st, d, token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET);
         let result = t.compile();
         assert_eq!(result.unwrap(), test_string);
         assert_eq!(t.input, st);
@@ -158,7 +163,7 @@ mod tests {
         let st: &str = "my {{one}} {new template {{two}}";
         let mut d = Data::new();
         d.add_many(vec![("one","two"), ("two", "three")]);
-        let mut t = Template::new(st, d,  token::Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
+        let mut t = Template::new(st, d, token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET);
         let v = vec![
         ("m", token::TEXT),
         ("y", token::TEXT),

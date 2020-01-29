@@ -19,13 +19,13 @@ pub struct Lexer<'a>{
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(input: &'a str, data: data::Data, pattern: token::Pattern) -> Self {
+    pub fn new(input: &'a str, data: &data::Data, pattern: &token::Pattern) -> Self {
         Self { 
             input: input,
             read_position: 0,
-            pattern: pattern,
+            pattern: pattern.clone(),
             position: 0,
-            data : data,
+            data : data.clone(),
             ch: None,
             tokens : vec![],
         }

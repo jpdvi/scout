@@ -29,9 +29,32 @@ impl Token {
 
 impl Clone for Token {
     fn clone(&self) -> Self {
-            Self {
-                _type : String::from(&self._type),
-                literal : String::from(&self.literal)
-            }
+        Self {
+            _type : String::from(&self._type),
+            literal : String::from(&self.literal)
         }
+        }
+}
+
+pub struct Pattern {
+    pub left: String,
+    pub right: String
+}
+
+impl Pattern {
+    pub fn new(left: TokenType, right: TokenType) -> Self {
+        Self {
+            left: String::from(left),
+            right: String::from(right)
+        }
+    }
+}
+
+impl Clone for Pattern {
+    fn clone(&self) -> Self {
+        Self {
+            left: String::from(&self.left),
+            right: String::from(&self.right)
+        }
+    }
 }

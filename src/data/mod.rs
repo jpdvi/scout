@@ -24,6 +24,18 @@ impl Data {
     }
 }
 
+impl Clone for Data {
+    fn clone(&self) -> Self {
+        let mut new_map : HashMap<String, String> = [].iter().cloned().collect();
+        for (i, item) in self.data.keys().enumerate() {
+            new_map.insert(String::from(item), String::from(&self.data[item]));
+        }
+        Self {
+            data : new_map
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Data;

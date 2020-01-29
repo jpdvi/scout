@@ -1,19 +1,8 @@
 mod token;
 mod data;
+mod lexer;
+use lexer::Lexing;
 
-pub struct Pattern<'a> {
-    pub left: &'a str,
-    pub right: &'a str,
-}
-
-impl<'a> Pattern<'a> {
-    fn new(left: token::TokenType<'a>, right: token::TokenType<'a>) -> Self {
-        Self {
-            left: left,
-            right: right
-        }
-    }
-}
 
 pub struct Mark {
     pub left_index : Option<usize>,
@@ -30,33 +19,21 @@ impl Mark {
     }
 }
 
-pub trait Lexer {
-    fn read(&mut self);
-    fn read_char(&mut self);
-    fn next_token(&mut self) -> token::Token;
-    fn peek_char(&mut self)-> Option<char>;
-}
 
 pub struct Template<'a> {
-    pub read_position: u32,
-    pub position: u32,
+    l : lexer::Lexer<'a>,
     pub input: &'a str,
-    pub pattern: Pattern<'a>,
-    pub data: data::Data,
-    pub ch : Option<char>,
-    pub marks : Vec<Mark>,
+    pub pattern: token::Pattern,
     pub tokens : Vec<token::Token>,
+    marks : Vec<Mark>,
 }
 
 impl<'a> Template<'a> {
-    pub fn new(input: &'a str, data: data::Data, pattern: Pattern<'a>) -> Self {
+    pub fn new(input: &'a str, data: data::Data, pattern: token::Pattern) -> Self {
         let mut template = Self { 
+            l : lexer::Lexer::new(input, data.clone(), pattern.clone()),
             input: input,
             pattern: pattern,
-            read_position: 0,
-            position: 0,
-            data : data,
-            ch: None,
             marks : vec![],
             tokens : vec![],
         };
@@ -76,13 +53,14 @@ impl<'a> Template<'a> {
     }
 
     pub fn compile(&mut self) -> Result<String, &str> {
-        self.read();
+        self.l.read();
+        self.tokens = self.l.tokens.clone();
         let mut mark = Mark::new();
         for (i, item) in self.tokens.iter().enumerate() {
             if item._type == self.pattern.left && mark.left_index == None {
                 mark.left_index = Some(i);
             }
-            else if item._type == self.pattern.right && mark.right_index == None {
+            else if item._type == self.l.pattern.right && mark.right_index == None {
                 mark.right_index = Some(i);
             }
             else if mark.left_index != None && mark.right_index != None {
@@ -102,8 +80,8 @@ impl<'a> Template<'a> {
             // Content from Data map
             let mut content : String = String::new();
             // Check if data_key exists in our self.data (Data) map
-            if self.data.data.contains_key(&data_key.to_string()) {
-                content.push_str(&self.data.data[&data_key.to_string()]);
+            if self.l.data.data.contains_key(&data_key.to_string()) {
+                content.push_str(&self.l.data.data[&data_key.to_string()]);
             } else {
                 return Err("Unknown data key")
             }
@@ -114,6 +92,7 @@ impl<'a> Template<'a> {
                 self.tokens.remove(x - temp);
                 temp += 1;
                 x += 1;
+                
             }
 
             // Split and merge self.tokens to include our new content
@@ -144,85 +123,86 @@ impl<'a> Template<'a> {
 }
 
 
-impl<'a> Lexer for Template<'a> {
 
-    fn read(&mut self) {
-        let mut v : Vec<token::Token> = vec![];
-        while self.read_position as usize <= self.input.len() {
-            let tok = self.next_token();
-            v.push(tok);
-        }
-        self.tokens = v;
-    }
-
-    fn next_token(&mut self) -> token::Token {
-        self.read_char();
-        let tok : token::Token = match self.ch {
-            None => token::Token::new(token::EOF, self.ch),
-            Some('{') => {
-                    if self.peek_char() != None && self.peek_char().unwrap() == '{' && self.pattern.left == token::DOUBLELEFTBRACKET {
-                        let mut t : token::Token = token::Token::new(token::DOUBLELEFTBRACKET, None);
-                        t.literal = self.ch.unwrap().to_string() + &self.peek_char().unwrap().to_string();
-                        self.read_char();
-                        return t;
-                    }
-                    if self.pattern.left == token::LEFTBRACKET {
-                        return token::Token::new(token::LEFTBRACKET, self.ch)
-                    }
-                    return token::Token::new(token::TEXT, self.ch)
-                },
-            Some('}') => {
-                    if self.peek_char() != None && self.peek_char().unwrap() == '}' && self.pattern.right == token::DOUBLERIGHTBRACKET {
-                        let mut t : token::Token = token::Token::new(token::DOUBLERIGHTBRACKET, None);
-                        t.literal = self.ch.unwrap().to_string() + &self.peek_char().unwrap().to_string();
-                        self.read_char();
-                        return t;
-                    }
-                    if self.pattern.right == token::RIGHTBRACKET {
-                        return token::Token::new(token::RIGHTBRACKET, self.ch)
-                    }
-                    return token::Token::new(token::TEXT, self.ch)
-                },
-            Some(' ') => token::Token::new(token::SPACE, self.ch),
-            _=> token::Token::new(token::TEXT, self.ch),
-        };
-        return tok;
-    }
-
-    fn read_char(&mut self) {
-        if self.read_position >= self.input.len() as u32 {
-            self.ch = None
-        } else {
-            self.ch = Some(self.input.chars().nth(self.read_position as usize).unwrap());
-        }
-        
-        self.position = self.read_position;
-        self.read_position += 1;
-    }
-
-    fn peek_char(&mut self) -> Option<char> {
-        if self.read_position >= self.input.len() as u32 {
-            return None
-        } else {
-            return Some(self.input.chars().nth(self.read_position as usize).unwrap());
-        }
-    }
-}
+//jjimpl<'a> Lexing for Template<'a> {
+//j
+//j    fn read(&mut self) {
+//j        let mut v : Vec<token::Token> = vec![];
+//j        while self.read_position as usize <= self.input.len() {
+//j            let tok = self.next_token();
+//j            v.push(tok);
+//j        }
+//j        self.tokens = v;
+//j    }
+//j
+//j    fn next_token(&mut self) -> token::Token {
+//j        self.read_char();
+//j        let tok : token::Token = match self.ch {
+//j            None => token::Token::new(token::EOF, self.ch),
+//j            Some('{') => {
+//j                    if self.peek_char() != None && self.peek_char().unwrap() == '{' && self.pattern.left == token::DOUBLELEFTBRACKET {
+//j                        let mut t : token::Token = token::Token::new(token::DOUBLELEFTBRACKET, None);
+//j                        t.literal = self.ch.unwrap().to_string() + &self.peek_char().unwrap().to_string();
+//j                        self.read_char();
+//j                        return t;
+//j                    }
+//j                    if self.pattern.left == token::LEFTBRACKET {
+//j                        return token::Token::new(token::LEFTBRACKET, self.ch)
+//j                    }
+//j                    return token::Token::new(token::TEXT, self.ch)
+//j                },
+//j            Some('}') => {
+//j                    if self.peek_char() != None && self.peek_char().unwrap() == '}' && self.pattern.right == token::DOUBLERIGHTBRACKET {
+//j                        let mut t : token::Token = token::Token::new(token::DOUBLERIGHTBRACKET, None);
+//j                        t.literal = self.ch.unwrap().to_string() + &self.peek_char().unwrap().to_string();
+//j                        self.read_char();
+//j                        return t;
+//j                    }
+//j                    if self.pattern.right == token::RIGHTBRACKET {
+//j                        return token::Token::new(token::RIGHTBRACKET, self.ch)
+//j                    }
+//j                    return token::Token::new(token::TEXT, self.ch)
+//j                },
+//j            Some(' ') => token::Token::new(token::SPACE, self.ch),
+//j            _=> token::Token::new(token::TEXT, self.ch),
+//j        };
+//j        return tok;
+//j    }
+//j
+//j    fn read_char(&mut self) {
+//j        if self.read_position >= self.input.len() as u32 {
+//j            self.ch = None
+//j        } else {
+//j            self.ch = Some(self.input.chars().nth(self.read_position as usize).unwrap());
+//j        }
+//j        
+//j        self.position = self.read_position;
+//j        self.read_position += 1;
+//j    }
+//j
+//j    fn peek_char(&mut self) -> Option<char> {
+//j        if self.read_position >= self.input.len() as u32 {
+//j            return None
+//j        } else {
+//j            return Some(self.input.chars().nth(self.read_position as usize).unwrap());
+//j        }
+//j    }
+//j}
 
 #[cfg(test)]
 mod tests {
     use super::token;
     use super::Template;
     use super::data::Data;
-    use super::Pattern;
-    use super::Lexer;
+    use super::lexer;
+    use super::lexer::Lexing;
 
     
     #[test]
     fn test_template_create() {
         let st: &str = "my new template {test}";
         let mut d = Data::new();
-        let mut t = Template::new(st, d, Pattern::new(token::LEFTBRACKET, token::RIGHTBRACKET));
+        let mut t = Template::new(st, d, token::Pattern::new(token::LEFTBRACKET, token::RIGHTBRACKET));
     }
 
     #[test]
@@ -231,11 +211,11 @@ mod tests {
         let test_string : &str = "my two new template three";
         let mut d = Data::new();
         d.add_many(vec![("one","two"), ("two", "three")]);
-        let mut t = Template::new(st, d,  Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
+        let mut t = Template::new(st, d,  token::Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
         let result = t.compile();
         assert_eq!(result.unwrap(), test_string);
         assert_eq!(t.input, st);
-        assert_eq!(t.data.data.len() as u32, 2); 
+        assert_eq!(t.l.data.data.len() as u32, 2); 
     }
 
     #[test]
@@ -243,7 +223,7 @@ mod tests {
         let st: &str = "my {{one}} {new template {{two}}";
         let mut d = Data::new();
         d.add_many(vec![("one","two"), ("two", "three")]);
-        let mut t = Template::new(st, d,  Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
+        let mut t = Template::new(st, d,  token::Pattern::new(token::DOUBLELEFTBRACKET, token::DOUBLERIGHTBRACKET));
         let v = vec![
         ("m", token::TEXT),
         ("y", token::TEXT),
@@ -276,7 +256,7 @@ mod tests {
         (" ", token::EOF),
         ];
         for test_case in v {
-            let n  : token::Token = t.next_token();
+            let n  : token::Token = t.l.next_token();
             assert_eq!(test_case.0, n.literal);
             assert_eq!(test_case.1, n._type);
         }

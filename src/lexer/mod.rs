@@ -8,9 +8,9 @@ pub trait Lexing {
     fn peek_char(&mut self)-> Option<char>;
 }
 
-pub struct Lexer<'a>{
+pub struct Lexer {
     pub read_position: u32,
-    pub input: &'a str,
+    pub input: String,
     pub tokens : Vec<token::Token>,
     pub pattern: token::Pattern,
     pub position: u32,
@@ -18,10 +18,10 @@ pub struct Lexer<'a>{
     pub ch : Option<char>,
 }
 
-impl<'a> Lexer<'a> {
-    pub fn new(input: &'a str, data: &data::Data, pattern: &token::Pattern) -> Self {
+impl Lexer {
+    pub fn new(input: &str, data: &data::Data, pattern: &token::Pattern) -> Self {
         Self { 
-            input: input,
+            input: input.to_string(),
             read_position: 0,
             pattern: pattern.clone(),
             position: 0,
@@ -32,7 +32,7 @@ impl<'a> Lexer<'a> {
     }
 }
 
-impl<'a> Lexing for Lexer<'a> {
+impl Lexing for Lexer {
     fn read(&mut self) {
         let mut v : Vec<token::Token> = vec![];
         while self.read_position as usize <= self.input.len() {

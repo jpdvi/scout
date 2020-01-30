@@ -58,8 +58,8 @@ pub struct Pattern {
 impl Pattern {
     pub fn new(left: TokenType, right: TokenType, _type: PatternType) -> Self {
         Self {
-            left: String::from(left),
-            right: String::from(right),
+            left: left.to_string(),
+            right: right.to_string(),
             _type: _type,
         }
     }
@@ -72,8 +72,8 @@ impl Clone for Pattern {
             _=> PatternType::STRING
         };
         Self {
-            left: String::from(&self.left),
-            right: String::from(&self.right),
+            left: self.left.to_string(),
+            right: self.right.to_string(),
             _type: t,
         }
     }

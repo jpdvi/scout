@@ -3,14 +3,14 @@ use super::lexer;
 use super::lexer::Lexing;
 use super::data;
 
-pub struct Parser<'a> {
-    l : lexer::Lexer<'a>,
+pub struct Parser {
+    l : lexer::Lexer,
     current_token: Option<token::Token>,
     peek_token: Option<token::Token>,
 }
 
-impl<'a> Parser<'a> {
-    fn new(input: &'a str, _data: &data::Data, _pattern: &token::Pattern) -> Self {
+impl Parser {
+    fn new(input: &str, _data: &data::Data, _pattern: &token::Pattern) -> Self {
         let mut _lexer : lexer::Lexer = lexer::Lexer::new(input, &_data.clone(), &_pattern.clone());  
         Self {
             l: _lexer,

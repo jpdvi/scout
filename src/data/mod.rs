@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct Data {
     pub data : HashMap<String, String>,
 }
@@ -24,17 +25,6 @@ impl Data {
     }
 }
 
-impl Clone for Data {
-    fn clone(&self) -> Self {
-        let mut new_map : HashMap<String, String> = [].iter().cloned().collect();
-        for (i, item) in self.data.keys().enumerate() {
-            new_map.insert(item.to_string(), String::from(&self.data[item]));
-        }
-        Self {
-            data : new_map
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {

@@ -4,7 +4,7 @@ mod lexer;
 mod parser;
 use lexer::Lexing;
 
-
+#[derive(Clone)]
 pub struct Mark {
     pub left_index : Option<usize>,
     pub right_index: Option<usize>,

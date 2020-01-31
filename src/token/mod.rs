@@ -17,6 +17,7 @@ pub static GT: &str = ">";
 // HTML
 pub static ENDHTMLBLOCK: &str = "/>";
 
+#[derive(Clone)]
 pub struct Token {
     pub literal: String,
     pub _type: String,
@@ -35,14 +36,6 @@ impl Token {
     }
 }
 
-impl Clone for Token {
-    fn clone(&self) -> Self {
-        Self {
-            _type : String::from(&self._type),
-            literal : String::from(&self.literal)
-        }
-        }
-}
 
 pub enum PatternType {
     HTML,

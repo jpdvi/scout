@@ -8,9 +8,9 @@ pub trait Lexing {
     fn peek_char(&mut self)-> Option<char>;
 }
 
-pub struct Lexer<'a>{
+pub struct Lexer {
     pub read_position: u32,
-    pub input: &'a str,
+    pub input: String,
     pub tokens : Vec<token::Token>,
     pub pattern: token::Pattern,
     pub position: u32,
@@ -18,21 +18,21 @@ pub struct Lexer<'a>{
     pub ch : Option<char>,
 }
 
-impl<'a> Lexer<'a> {
-    pub fn new(input: &'a str, data: data::Data, pattern: token::Pattern) -> Self {
+impl Lexer {
+    pub fn new(input: &str, data: &data::Data, pattern: &token::Pattern) -> Self {
         Self { 
-            input: input,
+            input: input.to_string(),
             read_position: 0,
-            pattern: pattern,
+            pattern: pattern.clone(),
             position: 0,
-            data : data,
+            data : data.clone(),
             ch: None,
             tokens : vec![],
         }
     }
 }
 
-impl<'a> Lexing for Lexer<'a> {
+impl Lexing for Lexer {
     fn read(&mut self) {
         let mut v : Vec<token::Token> = vec![];
         while self.read_position as usize <= self.input.len() {
@@ -47,7 +47,8 @@ impl<'a> Lexing for Lexer<'a> {
         let tok : token::Token = match self.ch {
             None => token::Token::new(token::EOF, self.ch),
             Some('{') => {
-                    if self.peek_char() != None && self.peek_char().unwrap() == '{' && self.pattern.left == token::DOUBLELEFTBRACKET {
+                    if self.peek_char() != None && self.peek_char().unwrap() == '{'
+                        && self.pattern.left == token::DOUBLELEFTBRACKET {
                         let mut t : token::Token = token::Token::new(token::DOUBLELEFTBRACKET, None);
                         t.literal = self.ch.unwrap().to_string() + &self.peek_char().unwrap().to_string();
                         self.read_char();
@@ -59,7 +60,8 @@ impl<'a> Lexing for Lexer<'a> {
                     return token::Token::new(token::TEXT, self.ch)
                 },
             Some('}') => {
-                    if self.peek_char() != None && self.peek_char().unwrap() == '}' && self.pattern.right == token::DOUBLERIGHTBRACKET {
+                    if self.peek_char() != None && self.peek_char().unwrap() == '}'
+                        && self.pattern.right == token::DOUBLERIGHTBRACKET {
                         let mut t : token::Token = token::Token::new(token::DOUBLERIGHTBRACKET, None);
                         t.literal = self.ch.unwrap().to_string() + &self.peek_char().unwrap().to_string();
                         self.read_char();

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Debug, Clone)]
 pub struct Data {
     pub data : HashMap<String, String>,
 }
@@ -14,7 +15,7 @@ impl Data {
     }
 
     pub fn add(&mut self, key: &str, value: &str) { //-> Result<Option<(&str, &str)>, &str> {
-        self.data.insert(String::from(key), String::from(value));        
+        self.data.insert(key.to_string(), value.to_string());        
     }
 
     pub fn add_many(&mut self, key_values: Vec<(&str, &str)>) {
@@ -24,17 +25,6 @@ impl Data {
     }
 }
 
-impl Clone for Data {
-    fn clone(&self) -> Self {
-        let mut new_map : HashMap<String, String> = [].iter().cloned().collect();
-        for (i, item) in self.data.keys().enumerate() {
-            new_map.insert(String::from(item), String::from(&self.data[item]));
-        }
-        Self {
-            data : new_map
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {

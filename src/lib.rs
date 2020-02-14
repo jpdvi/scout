@@ -96,23 +96,18 @@ impl Template {
                 self.tokens.remove(x - temp);
                 temp += 1;
                 x += 1;
-                
             }
 
             // Split and merge self.tokens to include our new content
             let mut section_end: usize = item.left_index.unwrap() - removed;
-            let mut left_arr = &self.tokens[ .. section_end].to_vec();                        
-            let mut right_arr = &self.tokens[ section_end .. ].to_vec();
+            let mut left_arr = self.tokens[ .. section_end].to_vec();                        
+            let mut right_arr = self.tokens[ section_end .. ].to_vec();
             let mut content_token = token::Token::new(token::TEXT, None);
             content_token.literal = content;
             let mut updated_tokens = vec![]; 
-            for item in left_arr {
-                updated_tokens.push(item.clone());
-            }
+            updated_tokens.append(&mut left_arr);
             updated_tokens.push(content_token);
-            for item in right_arr {
-                updated_tokens.push(item.clone());
-            }
+            updated_tokens.append(&mut right_arr);
             self.tokens = updated_tokens;
             removed += temp -1;
         }

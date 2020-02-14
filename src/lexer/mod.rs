@@ -92,8 +92,7 @@ impl Lexing for Lexer {
     fn peek_char(&mut self) -> Option<char> {
         if self.read_position >= self.input.len() as u32 {
             return None
-        } else {
-            return Some(self.input.chars().nth(self.read_position as usize).unwrap());
-        }
+        } 
+        return Some(self.input.chars().nth(self.read_position as usize).unwrap());
     }
 }
